@@ -5,10 +5,11 @@
 \title{Meta-analysis of diagnostic test accuracy studies with the multiple
 cutoffs model}
 \usage{
-diagmeta(TP, FP, TN, FN, cutoff, studlab, data = NULL, distr = "logistic",
-  model = "DICS", equalvar = FALSE, lambda = 0.5, log.cutoff = FALSE,
-  method.weights = "invvar", level = 0.95, incr = 0.5,
-  n.iter.max = 1000, tol = 1e-08, silent = TRUE, ...)
+diagmeta(TP, FP, TN, FN, cutoff, studlab, data = NULL,
+  distr = "logistic", model = "DICS", equalvar = FALSE,
+  lambda = 0.5, log.cutoff = FALSE, method.weights = "invvar",
+  level = 0.95, incr = 0.5, n.iter.max = 1000, tol = 1e-08,
+  silent = TRUE, ...)
 }
 \arguments{
 \item{TP, FP, TN, FN}{Numeric vectors giving the number of true
@@ -70,6 +71,8 @@ An object of class "diagmeta" with corresponding print,
 \item{level, incr}{As defined above.}
 \item{k}{The number of studies in the meta-analysis.}
 \item{optcut}{The optimal cutoff.}
+\item{lower.optcut, upper.optcut}{Corresponding lower and upper
+  confidence limits (for normal distribution).}
 \item{Sens.optcut}{The sensitivity at the optimal cutoff.}
 \item{lower.Sens.optcut, upper.Sens.optcut}{Corresponding lower and
   upper confidence limits.}

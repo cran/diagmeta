@@ -21,10 +21,12 @@
 #' Youden index. For \code{which="ROC"}, study-specific ROC curves are
 #' shown. For \code{which="SROC"}, the model-based summary ROC curve
 #' is shown. For \code{which="density"}, the model-based densities of
-#' both groups are shown.  Instead of character strings, a numeric
-#' value or vector can be used to specify plots with numbers
+#' both groups are shown. For \code{which="sensspec"}, the sensitivity
+#' (decreasing with increasing cutoff) and the specificity (increasing
+#' with increasing cutoff) are shown. Instead of character strings, a
+#' numeric value or vector can be used to specify plots with numbers
 #' corresponding to the following order of plots: "regression", "cdf",
-#' "survival", "youden", "roc", "sroc", and "density".
+#' "survival", "youden", "roc", "sroc", "density", and "sensspec".
 #' 
 #' Other arguments refer to further plot parameters, such as
 #' \code{lines} (whether points belonging to the same study should be
@@ -46,8 +48,8 @@
 #' @param xlab An x axis label
 #' @param main A logical indicating title to the plot
 #' @param ci A logical indicating whether confidence intervals should
-#'   be plotted for \code{"reg"}, \code{"cdf"}, \code{"survival"} and
-#'   \code{"Youden"}
+#'   be plotted for \code{"reg"}, \code{"cdf"}, \code{"survival"},
+#'   \code{"Youden"}, and \code{"sensspec"}
 #' @param ciSens A logical indicating whether confidence intervals
 #'   should be plotted for sensitivity, given the specificity in
 #'   \code{"SROC"} plot
@@ -62,11 +64,11 @@
 #'   on \code{"ROC"} plot
 #' @param lines A logical indicating whether polygonal lines
 #'   connecting points belonging to the same study should be printed
-#'   in plots \code{"reg"}, \code{"cdf"}, \code{"survival"} and
-#'   \code{"Youden"}
+#'   in plots \code{"reg"}, \code{"cdf"}, \code{"survival"},
+#'   \code{"Youden"}, and \code{"sensspec"}
 #' @param rlines A logical indicating whether regression lines or
 #'   curves should be plotted for plots \code{"reg"}, \code{"cdf"},
-#'   \code{"survival"} and \code{"Youden"}
+#'   \code{"survival"}, \code{"Youden"}, and \code{"sensspec"}
 #' @param line.optcut A logical indicating whether a vertical line
 #'   should be plotted at the optimal cutoff line for plots
 #'   \code{"cdf"}, \code{"survival"}, \code{"Youden"}, and
@@ -189,25 +191,26 @@ plot.diagmeta <- function(x,
   chklogical <- meta:::chklogical
   ##
   plot.types <- c("regression", "cdf", "survival", "youden",
-                  "roc", "sroc", "density")
+                  "roc", "sroc", "density", "sensspec")
   
   
   if (is.character(which))
     which <- setchar(which, plot.types)
   else if (is.numeric(which)) {
-    if (any(which < 1) | any(which > 7))
-      stop("Numeric values of argument 'which' must be in 1:7")
+    if (any(which < 1) | any(which > 8))
+      stop("Numeric values of argument 'which' must be in 1:8")
     which <- plot.types[which]
   }
   else
     stop("Argument 'which' must be a character vector or ",
-         "a numeric vector with values between 1 and 7.")
+         "a numeric vector with values between 1 and 8.")
   ##
   which <- unique(which)
   ##
   mains <- c("Regression lines", "Cumulative density functions",
              "Survival curves", "Youden index", "ROC curves",
-             "SROC curve", "Density functions")[match(which, plot.types)]
+             "SROC curve", "Density functions",
+             "Sensitivity and Specificity")[match(which, plot.types)]
   ##
   if (!missing(main))
     if (is.logical(main)) {
@@ -260,23 +263,33 @@ plot.diagmeta <- function(x,
   ##
   on.exit(par(oldpar))
   
+
+  k <- x$k
+  ##
+  o <- order(x$studlab, x$cutoff)
+  ##
+  cutoff <- x$cutoff[o]
+  studlab <- x$studlab[o]
+  Spec <- x$Spec[o]
+  Sens <- x$Sens[o]
   
-  study.no <- as.numeric(as.factor(x$studlab))
+  
+  study.no <- as.numeric(as.factor(studlab))
   ##  
   if (col.points == "rainbow")
-    cols <- rainbow(x$k)[study.no]
+    cols <- rainbow(k)[study.no]
   else if (col.points == "topo")
-    cols <- topo.colors(x$k)[study.no]
+    cols <- topo.colors(k)[study.no]
   else if (col.points == "heat")
-    cols <- heat.colors(x$k)[study.no]
+    cols <- heat.colors(k)[study.no]
   else if (col.points == "terrain")
-    cols <- terrain.colors(x$k)[study.no]
+    cols <- terrain.colors(k)[study.no]
   else if (col.points == "cm")
-    cols <- cm.colors(x$k)[study.no]
+    cols <- cm.colors(k)[study.no]
   else if (col.points == "gray")
-    cols <- gray(1:x$k / (x$k + 1))[study.no]
+    cols <- gray(1:k / (k + 1))[study.no]
   else if (col.points == "black")
-    cols <- rep(1, x$k)[study.no]
+    cols <- rep(1, k)[study.no]
   ##
   col.points <- cols
   ##
@@ -293,9 +306,6 @@ plot.diagmeta <- function(x,
     ylab <- ""
   
   
-  cutoff <- x$cutoff
-  studlab <- x$studlab
-  ##
   distr <- x$distr
   level <- x$level
   lambda <- x$lambda
@@ -318,9 +328,6 @@ plot.diagmeta <- function(x,
   ##
   var.nondiseased <- x$var.nondiseased
   var.diseased <- x$var.diseased
-  ##
-  Spec <- x$Spec
-  Sens <- x$Sens
   ##
   NN <- x$data.lmer$NN
   Cutoff <- x$data.lmer$Cutoff
@@ -349,12 +356,12 @@ plot.diagmeta <- function(x,
     ##
     if (lines)
       for (s in studlab) {
-        lines(cutoff[which(studlab == s)],
-              qdiag(Spec[which(studlab == s)], distr),
+        lines(cutoff[studlab == s],
+              qdiag(Spec[studlab == s], distr),
               col = col.points[studlab == s], lwd = lwd, lty = 2)
         ##
-        lines(cutoff[which(studlab == s)],
-              qdiag(1 - Sens[which(studlab == s)], distr),
+        lines(cutoff[studlab == s],
+              qdiag(1 - Sens[studlab == s], distr),
               col = col.points[studlab == s], lwd = lwd, lty = 1)
       }
     ##
@@ -457,12 +464,12 @@ plot.diagmeta <- function(x,
     ##
     if (lines)
       for (s in studlab) {
-        lines(cutoff[which(studlab == s)], 
-              Spec[which(studlab == s)],
+        lines(cutoff[studlab == s], 
+              Spec[studlab == s],
               col = col.points[studlab == s], lwd = lwd, lty = 2)
         ##
-        lines(cutoff[which(studlab == s)], 
-              1 - Sens[which(studlab == s)],
+        lines(cutoff[studlab == s], 
+              1 - Sens[studlab == s],
               col = col.points[studlab == s], lwd = lwd, lty = 1)
       }
     ##
@@ -621,13 +628,13 @@ plot.diagmeta <- function(x,
     ##
     if (lines) {
       for (s in studlab)
-        lines(cutoff[which(studlab == s)], 
-              Sens[which(studlab == s)],
+        lines(cutoff[studlab == s], 
+              Sens[studlab == s],
               col = col.points[studlab == s], lwd = lwd, lty = 2)
       ##
       for (s in studlab)
-        lines(cutoff[which(studlab == s)], 
-              1 - Spec[which(studlab == s)],
+        lines(cutoff[studlab == s], 
+              1 - Spec[studlab == s],
               col = col.points[studlab == s], lwd = lwd, lty = 1)
     }
     ##
@@ -788,8 +795,8 @@ plot.diagmeta <- function(x,
     ##
     if (lines) {
       for (s in studlab)
-        lines(cutoff[which(studlab == s)],
-              youden[which(studlab == s)],
+        lines(cutoff[studlab == s],
+              youden[studlab == s],
               col = col.points[studlab == s], lwd = lwd)
     }
     ##
@@ -1074,6 +1081,168 @@ plot.diagmeta <- function(x,
       abline(v = optcut)
   }
   
+  
+  ##
+  ##
+  ## Sensitivity and specificity
+  ##
+  ##
+  if ("sensspec" %in% which) {
+    ##
+    plot(c(cutoff, cutoff), c(Spec, Sens),
+         type = "n",
+         las = 1, log = log.axis,
+         ylab = "Sensitivity / Specificity", xlab = xlab,
+         main = mains[match("sensspec", which)],
+         xlim = xlim, ylim = c(0, 1), ...)
+    ##
+    ## Add lines
+    ##    
+    if (lines) {
+      for (s in studlab) {
+        lines(cutoff[studlab == s], Spec[studlab == s],
+              col = col.points[studlab == s], lwd = lwd,
+              lty = 2)
+        lines(cutoff[studlab == s], Sens[studlab == s],
+              col = col.points[studlab == s], lwd = lwd,
+              lty = 1)
+      }
+    }
+    ##
+    ## Add data
+    ##
+    points(cutoff, Sens, pch = pch.points, cex = cex,
+           col = col.points)
+    points(cutoff, Spec, pch = 1, cex = cex, col = col.points)
+    ##
+    ## Add curves
+    ##
+    if (log.cutoff) {
+      ##
+      if (rlines) {
+        curve(calcSpec(ciRegr(log(x),
+                              alpha0, var.alpha0,
+                              beta0, var.beta0,
+                              cov.alpha0.beta0,
+                              var.nondiseased,
+                              level)$TE,
+                       distr),
+              lty = 2, col = 1, lwd = lwd, add = TRUE)
+        ##
+        curve(calcSens(ciRegr(log(x),
+                              alpha1, var.alpha1,
+                              beta1, var.beta1,
+                              cov.alpha1.beta1,
+                              var.diseased,
+                              level)$TE,
+                       distr),
+              lty = 1, col = 1, lwd = lwd, add = TRUE)
+      }
+      ##
+      if (ci) {
+        curve(calcSpec(ciRegr(log(x),
+                              alpha0, var.alpha0,
+                              beta0, var.beta0,
+                              cov.alpha0.beta0,
+                              var.nondiseased,
+                              level)$lower,
+                       distr),
+              lty = 2, col = "gray", lwd = lwd, add = TRUE)
+        ##
+        curve(calcSpec(ciRegr(log(x),
+                              alpha0, var.alpha0,
+                              beta0, var.beta0,
+                              cov.alpha0.beta0,
+                              var.nondiseased,
+                              level)$upper,
+                       distr),
+              lty = 2, col = "gray", lwd = lwd, add = TRUE)
+        ##
+        curve(calcSens(ciRegr(log(x),
+                              alpha1, var.alpha1,
+                              beta1, var.beta1,
+                              cov.alpha1.beta1,
+                              var.diseased,
+                              level)$lower,
+                       distr),
+              lty = 1, col = "gray", lwd = lwd, add = TRUE)
+        ##
+        curve(calcSens(ciRegr(log(x),
+                              alpha1, var.alpha1,
+                              beta1, var.beta1,
+                              cov.alpha1.beta1,
+                              var.diseased,
+                              level)$upper,
+                       distr),
+              lty = 1, col = "gray", lwd = lwd, add = TRUE)
+      }
+    }
+    else {
+      ##
+      if (rlines) {
+        curve(calcSpec(ciRegr(x,
+                              alpha0, var.alpha0,
+                              beta0, var.beta0,
+                              cov.alpha0.beta0,
+                              var.nondiseased,
+                              level)$TE,
+                       distr),
+              lty = 2, col = 1, lwd = lwd, add = TRUE)
+        ##
+        curve(calcSens(ciRegr(x,
+                              alpha1, var.alpha1,
+                              beta1, var.beta1,
+                              cov.alpha1.beta1,
+                              var.diseased,
+                              level)$TE,
+                       distr),
+              lty = 1, col = 1, lwd = lwd, add = TRUE)
+      }
+      ##
+      if (ci) {
+        curve(calcSpec(ciRegr(x,
+                              alpha0, var.alpha0,
+                              beta0, var.beta0,
+                              cov.alpha0.beta0,
+                              var.nondiseased,
+                              level)$lower,
+                       distr),
+              lty = 2, col = "gray", lwd = lwd, add = TRUE)
+        ##
+        curve(calcSpec(ciRegr(x,
+                              alpha0, var.alpha0,
+                              beta0, var.beta0,
+                              cov.alpha0.beta0,
+                              var.nondiseased,
+                              level)$upper,
+                       distr),
+              lty = 2, col = "gray", lwd = lwd, add = TRUE)
+        ##
+        curve(calcSens(ciRegr(x,
+                              alpha1, var.alpha1,
+                              beta1, var.beta1,
+                              cov.alpha1.beta1,
+                              var.diseased,
+                              level)$lower,
+                       distr),
+              lty = 1, col = "gray", lwd = lwd, add = TRUE)
+        ##
+        curve(calcSens(ciRegr(x,
+                              alpha1, var.alpha1,
+                              beta1, var.beta1,
+                              cov.alpha1.beta1,
+                              var.diseased,
+                              level)$upper,
+                       distr),
+              lty = 1, col = "gray", lwd = lwd, add = TRUE)
+      }
+    }
+    ##
+    ## Draw line for optimal cutoff
+    ##
+    if (line.optcut) 
+      abline(v = optcut)
+  }  
   
   invisible(NULL)
 }
