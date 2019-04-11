@@ -21,9 +21,7 @@ diagstats(x, cutoff = x$optcut, sens, spec, prevalence, level = 0.95)
 \item{level}{The level used to calculate confidence intervals}
 }
 \value{
-A data frame of class "diagstats" with the following
-  variables:
-
+A data frame of class "diagstats" with the following variables:
 \item{cutoff}{Cutoffs provided in argument "cutoff" and / or
   model-based cutoff values for given sensitivities /
   specificities.}
@@ -57,7 +55,6 @@ predictive values (NPV), and probabilities of disease (PD) are
 calculated if the prevalence is provided.
 }
 \examples{
-
 # FENO dataset
 #
 data(Schneider2017)
@@ -84,7 +81,7 @@ diagstats(diag1, sens = 0.95, spec = 0.95)
 \code{\link{diagmeta}} \code{\link{print.diagstats}}
 }
 \author{
-Gerta Rücker \email{ruecker@imbi.uni-freiburg.de}, Srinath
-  Kolampally \email{kolampal@imbi.uni-freiburg.de}, Guido
-  Schwarzer \email{sc@imbi.uni-freiburg.de}
+Gerta Rücker \email{ruecker@imbi.uni-freiburg.de},
+Srinath Kolampally \email{kolampal@imbi.uni-freiburg.de},
+Guido Schwarzer \email{sc@imbi.uni-freiburg.de}
 }

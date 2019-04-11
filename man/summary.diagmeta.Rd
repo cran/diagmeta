@@ -13,14 +13,13 @@
 }
 \value{
 A list with classes 'summary.diagmeta' and 'diagmeta' is
-  returned. The list elements are identical to a
-  \code{\link{diagmeta}} object.
+returned. The list elements are identical to a
+\code{\link{diagmeta}} object.
 }
 \description{
 Summary method for objects of class \code{diagmeta}.
 }
 \examples{
-
 # FENO dataset
 #
 data(Schneider2017)
@@ -38,5 +37,5 @@ summary(diag1)
 }
 \author{
 Srinath Kolampally \email{kolampal@imbi.uni-freiburg.de},
-  Guido Schwarzer \email{sc@imbi.uni-freiburg.de}
+Guido Schwarzer \email{sc@imbi.uni-freiburg.de}
 }

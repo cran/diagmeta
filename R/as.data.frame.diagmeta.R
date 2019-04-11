@@ -1,5 +1,6 @@
 #' Extract data frame from diagmeta objects
 #' 
+#' @description
 #' Extract data frame from objects of class \code{diagmeta}.
 #' 
 #' @param x An object of class \code{diagmeta}.
@@ -13,11 +14,10 @@
 #' 
 #' @seealso \code{\link{diagmeta}} \code{\link{summary.diagmeta}}
 #'
-#' @return A data frame is returned by the function
-#'   \code{as.data.frame}.
+#' @return
+#' A data frame is returned by the function \code{as.data.frame}.
 #' 
 #' @examples
-#' 
 #' # FENO dataset
 #' #
 #' data(Schneider2017)
@@ -29,7 +29,9 @@
 #' 
 #' as.data.frame(diag1)
 #'
+#' @method as.data.frame diagmeta
 #' @export
+#' @export as.data.frame.diagmeta
 
 
 as.data.frame.diagmeta <- function(x, row.names=NULL, optional=FALSE, ...) {

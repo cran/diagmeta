@@ -17,14 +17,13 @@ discrete or continuous variable}
 }
 \value{
 A data frame with values that can be entered into
-  \code{\link{diagmeta}}.
+\code{\link{diagmeta}}.
 }
 \description{
 Function to transform individual patient data (IPD) to enter them
 into \code{diagmeta}
 }
 \examples{
-
 # Simulate IPD data for three studies, each with 30 patients based
 # on normally distributed marker values
 #
@@ -65,6 +64,6 @@ plot(diag1, which = "SROC", ciSens = TRUE,
   \link{print.diagmeta}, \link{summary.diagmeta}}
 }
 \author{
-Gerta Rücker \email{ruecker@imbi.uni-freiburg.de}, Srinath
-  Kolampally \email{kolampal@imbi.uni-freiburg.de}
+Gerta Rücker \email{ruecker@imbi.uni-freiburg.de},
+Srinath Kolampally \email{kolampal@imbi.uni-freiburg.de}
 }

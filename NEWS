@@ -1,8 +1,24 @@
-*** diagmeta, version 0.3-0, 2018-mm-dd ***
+*** diagmeta, version 0.3-1, 2019-mm-dd ***
 
  ** User-visible changes **
 
-  * New function as.data.frame.diagmeta()
+  * Export R functions:
+    - as.data.frame.diagmeta(), plot.diagmeta(), print.diagmeta(),
+      print.diagstats(), print.summary.diagmeta(), summary.diagmeta()
+
+  * plot.diagmeta():
+    - argument 'col.points' can be any color defined in colours()
+    - new argument 'col.ci' to specify color of curves with confidence
+      limits
+
+  * diagmeta():
+    - check for numerical values in arguments 'TP', 'FP', 'TN', 'FN',
+      and 'cutoff'
+
+
+*** diagmeta, version 0.3-0, 2018-12-11 ***
+
+ ** User-visible changes **
 
   * plot.diagmeta():
     new plot type to show sensitivity and specificity curves
@@ -12,6 +28,8 @@
   * print.summary.diagmeta():
     - print confidence interval for optimal cutoff
       (for normal distribution)
+
+  * New function as.data.frame.diagmeta()
 
  ** Bug fixes **
 

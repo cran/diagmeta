@@ -17,7 +17,6 @@
 Print method for objects of class \code{summary.diagmeta}.
 }
 \examples{
-
 # FENO dataset
 #
 data(Schneider2017)
@@ -35,8 +34,9 @@ print(summary(diag1), digits = 2)
 \code{\link{diagmeta}} \code{\link{summary.diagmeta}}
 }
 \author{
-Gerta Rücker \email{ruecker@imbi.uni-freiburg.de}, Susanne
-  Steinhauser \email{susanne.steinhauser@uni-koeln.de}, Srinath
-  Kolampally \email{kolampal@imbi.uni-freiburg.de}, Guido
-  Schwarzer \email{sc@imbi.uni-freiburg.de}
+Gerta Rücker \email{ruecker@imbi.uni-freiburg.de},
+Susanne Steinhauser \email{susanne.steinhauser@uni-koeln.de},
+Srinath Kolampally \email{kolampal@imbi.uni-freiburg.de},
+Guido Schwarzer \email{sc@imbi.uni-freiburg.de}
 }
+\keyword{print}

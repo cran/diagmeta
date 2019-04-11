@@ -9,9 +9,9 @@ multiple cutoffs model}
   "sroc"), xlab = "threshold", main, ci = FALSE, ciSens = FALSE,
   ciSpec = FALSE, mark.optcut = FALSE, mark.cutpoints = FALSE,
   points = TRUE, lines = FALSE, rlines = TRUE, line.optcut = TRUE,
-  col.points = "rainbow", cex = 1, pch.points = 16, cex.marks = 0.7
-  * cex, lwd = 1, lwd.optcut = 2 * lwd, shading = "none",
-  ellipse = FALSE, xlim = NULL, ...)
+  col.points = "rainbow", cex = 1, pch.points = 16,
+  col.ci = "gray", cex.marks = 0.7 * cex, lwd = 1, lwd.optcut = 2 *
+  lwd, shading = "none", ellipse = FALSE, xlim = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{diagmeta}}
@@ -60,15 +60,18 @@ should be plotted at the optimal cutoff line for plots
 \code{"cdf"}, \code{"survival"}, \code{"Youden"}, and
 \code{"density"}}
 
-\item{col.points}{A character vector indicating color, either
-\code{"rainbow"} or \code{"topo"} or \code{"heat"} or
-\code{"terrain"} or \code{"cm"} or \code{"gray"} or
-\code{"black"}}
+\item{col.points}{A character string indicating color of points,
+either \code{"rainbow"}, \code{"topo"}, \code{"heat"},
+\code{"terrain"}, \code{"cm"}, \code{"grayscale"} or any color
+defined in \code{\link[grDevices]{colours}}}
 
 \item{cex}{A numeric indicating magnification to be used for
-plotting text and symbols.}
+plotting text and symbols}
 
 \item{pch.points}{A numeric indicating plot symbol(s) for points}
+
+\item{col.ci}{A character string indicating color of confidence
+lines}
 
 \item{cex.marks}{A numeric indicating magnification(s) to be used
 for marking cutoffs}
@@ -85,7 +88,7 @@ confidence region in \code{"SROC"} plot, either \code{"none"} or
 should be drawn around the optimal cutoff}
 
 \item{xlim}{A character or numerical vector indicating the minimum
-and maximum value for the horizontal axes.}
+and maximum value for the horizontal axes}
 
 \item{\dots}{Additional graphical arguments}
 }
@@ -131,7 +134,6 @@ If no further arguments are provided, four standard plots
 format.
 }
 \examples{
-
 # FENO dataset
 #
 data(Schneider2017)
@@ -178,22 +180,26 @@ plot(diag1, which = "density", line.optcut = TRUE)
 
 }
 \references{
-Schneider A, Linde K, Reitsma JB, Steinhauser S, Rücker G (2017), A
-novel statistical model for analyzing data of a systematic review
+Schneider A, Linde K, Reitsma JB, Steinhauser S, Rücker G (2017):
+A novel statistical model for analyzing data of a systematic review
 generates optimal cutoff values for fractional exhaled nitric oxide
-for asthma diagnosis \emph{Journal of Clinical Epidemiology},
-\bold{92}, 69--78, doi: 10.1016/j.jclinepi.2017.09.001 .
+for asthma diagnosis.
+\emph{Journal of Clinical Epidemiology},
+\bold{92}, 69--78
 
-Steinhauser S, Schumacher M, Rücker G (2016), Modelling multiple
-thresholds in meta-analysis of diagnostic test accuracy
-studies. \emph{BMC Med Res Methodol}, \bold{16}, 97.
+Steinhauser S, Schumacher M, Rücker G (2016):
+Modelling multiple thresholds in meta-analysis of diagnostic test
+accuracy studies.
+\emph{BMC Medical Research Methodology},
+\bold{16}, 97
 }
 \seealso{
 \code{\link{diagmeta}}
 }
 \author{
-Gerta Rücker \email{ruecker@imbi.uni-freiburg.de}, Susanne
-  Steinhauser \email{susanne.steinhauser@uni-koeln.de}, Srinath
-  Kolampally \email{kolampal@imbi.uni-freiburg.de}, Guido
-  Schwarzer \email{sc@imbi.uni-freiburg.de}
+Gerta Rücker \email{ruecker@imbi.uni-freiburg.de},
+Susanne Steinhauser \email{susanne.steinhauser@uni-koeln.de},
+Srinath Kolampally \email{kolampal@imbi.uni-freiburg.de},
+Guido Schwarzer \email{sc@imbi.uni-freiburg.de}
 }
+\keyword{hplot}

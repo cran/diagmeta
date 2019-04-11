@@ -19,14 +19,12 @@
 \item{\dots}{Other arguments.}
 }
 \value{
-A data frame is returned by the function
-  \code{as.data.frame}.
+A data frame is returned by the function \code{as.data.frame}.
 }
 \description{
 Extract data frame from objects of class \code{diagmeta}.
 }
 \examples{
-
 # FENO dataset
 #
 data(Schneider2017)

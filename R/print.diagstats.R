@@ -1,5 +1,6 @@
 #' Print method for diagstats objects
 #' 
+#' @description
 #' Print method for objects of class \code{diagstats}.
 #' 
 #' @param x An object of class \code{diagmeta}.
@@ -16,8 +17,9 @@
 #' 
 #' @seealso \code{\link{diagstats}} \code{\link{diagmeta}}
 #' 
-#' @examples
+#' @keywords print
 #' 
+#' @examples
 #' # FENO dataset
 #' #
 #' data(Schneider2017)
@@ -30,12 +32,12 @@
 #' # Values for prevalence 10% at cutoffs 25 and 50
 #' #
 #' ds1 <- diagstats(diag1, c(25, 50), 0.10)
-#'
 #' ds1
-#'
 #' print(ds1, predicted = FALSE)
 #'
+#' @method print diagstats
 #' @export
+#' @export print.diagstats
 
 
 print.diagstats <- function(x,
