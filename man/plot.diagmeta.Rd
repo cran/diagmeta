@@ -5,29 +5,54 @@
 \title{Plot for meta-analysis of diagnostic test accuracy studies with the
 multiple cutoffs model}
 \usage{
-\method{plot}{diagmeta}(x, which = c("survival", "youden", "roc",
-  "sroc"), xlab = "threshold", main, ci = FALSE, ciSens = FALSE,
-  ciSpec = FALSE, mark.optcut = FALSE, mark.cutpoints = FALSE,
-  points = TRUE, lines = FALSE, rlines = TRUE, line.optcut = TRUE,
-  col.points = "rainbow", cex = 1, pch.points = 16,
-  col.ci = "gray", cex.marks = 0.7 * cex, lwd = 1, lwd.optcut = 2 *
-  lwd, shading = "none", ellipse = FALSE, xlim = NULL, ...)
+\method{plot}{diagmeta}(
+  x,
+  which = c("survival", "youden", "roc", "sroc"),
+  xlab = "Threshold",
+  main,
+  ci = FALSE,
+  ciSens = FALSE,
+  ciSpec = FALSE,
+  mark.optcut = FALSE,
+  mark.cutpoints = FALSE,
+  points = TRUE,
+  lines = FALSE,
+  rlines = TRUE,
+  line.optcut = TRUE,
+  col.points = "rainbow",
+  cex = 1,
+  pch.points = 16,
+  col = "black",
+  col.ci = "gray",
+  col.optcut = "black",
+  cex.marks = 0.7 * cex,
+  lwd = 1,
+  lwd.ci = lwd,
+  lwd.optcut = 2 * lwd,
+  lwd.study = lwd,
+  shading = "none",
+  col.hatching = col.ci,
+  lwd.hatching = lwd.ci,
+  ellipse = FALSE,
+  xlim = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{diagmeta}}
 
 \item{which}{A character vector indicating the type of plot, either
-\code{"reg"} or\code{"cdf"} or \code{"survival"} or
+\code{"regression"} or \code{"cdf"} or \code{"survival"} or
 \code{"Youden"} or \code{"ROC"} or \code{"SROC"} or
-\code{"density"}}
+\code{"density"} or \code{"sensspec"}, can be abbreviated}
 
 \item{xlab}{An x axis label}
 
 \item{main}{A logical indicating title to the plot}
 
 \item{ci}{A logical indicating whether confidence intervals should
-be plotted for \code{"reg"}, \code{"cdf"}, \code{"survival"},
-\code{"Youden"}, and \code{"sensspec"}}
+be plotted for \code{"regression"}, \code{"cdf"},
+\code{"survival"}, \code{"Youden"}, and \code{"sensspec"}}
 
 \item{ciSens}{A logical indicating whether confidence intervals
 should be plotted for sensitivity, given the specificity in
@@ -44,16 +69,18 @@ should be marked on \code{"SROC"} plot}
 cutoffs should be marked on \code{"SROC"} plot}
 
 \item{points}{A logical indicating whether points should be plotted
-on \code{"ROC"} plot}
+in plots \code{"regression"}, \code{"cdf"}, \code{"survival"},
+\code{"Youden"}, \code{"ROC"}, and \code{"sensspec"}}
 
 \item{lines}{A logical indicating whether polygonal lines
 connecting points belonging to the same study should be printed
-in plots \code{"reg"}, \code{"cdf"}, \code{"survival"},
+in plots \code{"regression"}, \code{"cdf"}, \code{"survival"},
 \code{"Youden"}, and \code{"sensspec"}}
 
 \item{rlines}{A logical indicating whether regression lines or
-curves should be plotted for plots \code{"reg"}, \code{"cdf"},
-\code{"survival"}, \code{"Youden"}, and \code{"sensspec"}}
+curves should be plotted for plots \code{"regression"},
+\code{"cdf"}, \code{"survival"}, \code{"Youden"}, and
+\code{"sensspec"}}
 
 \item{line.optcut}{A logical indicating whether a vertical line
 should be plotted at the optimal cutoff line for plots
@@ -62,7 +89,7 @@ should be plotted at the optimal cutoff line for plots
 
 \item{col.points}{A character string indicating color of points,
 either \code{"rainbow"}, \code{"topo"}, \code{"heat"},
-\code{"terrain"}, \code{"cm"}, \code{"grayscale"} or any color
+\code{"terrain"}, \code{"cm"}, \code{"grayscale"}, or any color
 defined in \code{\link[grDevices]{colours}}}
 
 \item{cex}{A numeric indicating magnification to be used for
@@ -70,19 +97,35 @@ plotting text and symbols}
 
 \item{pch.points}{A numeric indicating plot symbol(s) for points}
 
+\item{col}{A character string indicating color of lines}
+
 \item{col.ci}{A character string indicating color of confidence
 lines}
+
+\item{col.optcut}{A character string indicating color of optimal
+cutoff line}
 
 \item{cex.marks}{A numeric indicating magnification(s) to be used
 for marking cutoffs}
 
 \item{lwd}{A numeric indicating line width}
 
+\item{lwd.ci}{A numeric indicating line width of confidence lines}
+
 \item{lwd.optcut}{A numeric indicating line width of optimal cutoff}
+
+\item{lwd.study}{A numeric indicating line width of individual
+studies}
 
 \item{shading}{A character indicating shading and hatching
 confidence region in \code{"SROC"} plot, either \code{"none"} or
 \code{"shade"} or \code{"hatch"}}
+
+\item{col.hatching}{A character string indicating color used in
+hatching of the confidence region}
+
+\item{lwd.hatching}{A numeric indicating line width used in hatching
+of the confidence region}
 
 \item{ellipse}{A logical indicating whether a confidence ellipse
 should be drawn around the optimal cutoff}
@@ -101,10 +144,10 @@ The first argument of the plot function is an object of class
 "diagmeta".
 
 The second argument \code{which} indicates which sort of plot(s)
-should be shown. For \code{which="reg"}, a scatter plot of the
-quantil-transformed proportions of negative test results with two
-regression lines is shown.  Points belonging to the same study are
-marked with the same colour. For \code{which="cdf"}, the two
+should be shown. For \code{which="regression"}, a scatter plot of
+the quantil-transformed proportions of negative test results with
+two regression lines is shown. Points belonging to the same study
+are marked with the same colour. For \code{which="cdf"}, the two
 cumulative distribution functions are shown, corresponding to the
 proportions of negative test results. For \code{which="survival"},
 the survival functions are shown, corresponding to the proportions
@@ -141,12 +184,12 @@ data(Schneider2017)
 diag1 <- diagmeta(tpos, fpos, tneg, fneg, cutpoint,
                   studlab = paste(author, year, group),
                   data = Schneider2017,
-                  model = "DIDS", log.cutoff = TRUE)
+                  log.cutoff = TRUE)
 
 
 # Regression plot with confidence intervals
 #
-plot(diag1, which = "reg", lines = FALSE, ci = TRUE)
+plot(diag1, which = "regr", lines = FALSE, ci = TRUE)
 
 # Cumulative distribution plot with optimal cutoff line and
 # confidence intervals

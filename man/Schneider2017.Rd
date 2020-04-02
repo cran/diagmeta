@@ -5,7 +5,8 @@
 \alias{Schneider2017}
 \title{Meta-analysis of studies of the diagnostic test accuracy of FENO
 for diagnosis of asthma}
-\format{A data frame with the following columns:
+\format{
+A data frame with the following columns:
 \tabular{rl}{
 \bold{\emph{study_id}}\tab numeric study ID \cr
 \bold{\emph{author}}\tab first author \cr
@@ -16,7 +17,8 @@ for diagnosis of asthma}
 \bold{\emph{fneg}}\tab number of false negatives \cr
 \bold{\emph{fpos}}\tab number of false positives \cr
 \bold{\emph{tneg}}\tab number of true negatives  \cr
-}}
+}
+}
 \source{
 Karrasch S, Linde K, Rücker G, Sommer H, Karsch-Volk M,
 Kleijnen J, Jörres RA, Schneider A (2017):
@@ -29,9 +31,6 @@ generates optimal cutoff values for fractional exhaled nitric oxide
 for asthma diagnosis.
 \emph{Journal of Clinical Epidemiology},
 \bold{92}, 69--78
-}
-\usage{
-Schneider2017
 }
 \description{
 Meta-analysis of studies of the diagnostic test accuracy of
@@ -50,7 +49,7 @@ data(Schneider2017)
 diag1 <- diagmeta(tpos, fpos, tneg, fneg, cutpoint,
                   studlab = paste(author, year, group),
                   data = Schneider2017,
-                  model = "DIDS", log.cutoff = TRUE)
+                  log.cutoff = TRUE)
 
 plot(diag1)
 }

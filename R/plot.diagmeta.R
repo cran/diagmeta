@@ -7,14 +7,14 @@
 #' 
 #' @param x An object of class \code{diagmeta}
 #' @param which A character vector indicating the type of plot, either
-#'   \code{"reg"} or\code{"cdf"} or \code{"survival"} or
+#'   \code{"regression"} or \code{"cdf"} or \code{"survival"} or
 #'   \code{"Youden"} or \code{"ROC"} or \code{"SROC"} or
-#'   \code{"density"}
+#'   \code{"density"} or \code{"sensspec"}, can be abbreviated
 #' @param xlab An x axis label
 #' @param main A logical indicating title to the plot
 #' @param ci A logical indicating whether confidence intervals should
-#'   be plotted for \code{"reg"}, \code{"cdf"}, \code{"survival"},
-#'   \code{"Youden"}, and \code{"sensspec"}
+#'   be plotted for \code{"regression"}, \code{"cdf"},
+#'   \code{"survival"}, \code{"Youden"}, and \code{"sensspec"}
 #' @param ciSens A logical indicating whether confidence intervals
 #'   should be plotted for sensitivity, given the specificity in
 #'   \code{"SROC"} plot
@@ -26,34 +26,46 @@
 #' @param mark.cutpoints A logical indicating whether the given
 #'   cutoffs should be marked on \code{"SROC"} plot
 #' @param points A logical indicating whether points should be plotted
-#'   on \code{"ROC"} plot
+#'   in plots \code{"regression"}, \code{"cdf"}, \code{"survival"},
+#'   \code{"Youden"}, \code{"ROC"}, and \code{"sensspec"}
 #' @param lines A logical indicating whether polygonal lines
 #'   connecting points belonging to the same study should be printed
-#'   in plots \code{"reg"}, \code{"cdf"}, \code{"survival"},
+#'   in plots \code{"regression"}, \code{"cdf"}, \code{"survival"},
 #'   \code{"Youden"}, and \code{"sensspec"}
 #' @param rlines A logical indicating whether regression lines or
-#'   curves should be plotted for plots \code{"reg"}, \code{"cdf"},
-#'   \code{"survival"}, \code{"Youden"}, and \code{"sensspec"}
+#'   curves should be plotted for plots \code{"regression"},
+#'   \code{"cdf"}, \code{"survival"}, \code{"Youden"}, and
+#'   \code{"sensspec"}
 #' @param line.optcut A logical indicating whether a vertical line
 #'   should be plotted at the optimal cutoff line for plots
 #'   \code{"cdf"}, \code{"survival"}, \code{"Youden"}, and
 #'   \code{"density"}
 #' @param col.points A character string indicating color of points,
 #'   either \code{"rainbow"}, \code{"topo"}, \code{"heat"},
-#'   \code{"terrain"}, \code{"cm"}, \code{"grayscale"} or any color
+#'   \code{"terrain"}, \code{"cm"}, \code{"grayscale"}, or any color
 #'   defined in \code{\link[grDevices]{colours}}
 #' @param cex A numeric indicating magnification to be used for
 #'   plotting text and symbols
 #' @param pch.points A numeric indicating plot symbol(s) for points
+#' @param col A character string indicating color of lines
 #' @param col.ci A character string indicating color of confidence
 #'   lines
+#' @param col.optcut A character string indicating color of optimal
+#'   cutoff line
 #' @param cex.marks A numeric indicating magnification(s) to be used
 #'   for marking cutoffs
 #' @param lwd A numeric indicating line width
+#' @param lwd.ci A numeric indicating line width of confidence lines
 #' @param lwd.optcut A numeric indicating line width of optimal cutoff
+#' @param lwd.study A numeric indicating line width of individual
+#'   studies
 #' @param shading A character indicating shading and hatching
 #'   confidence region in \code{"SROC"} plot, either \code{"none"} or
 #'   \code{"shade"} or \code{"hatch"}
+#' @param col.hatching A character string indicating color used in
+#'   hatching of the confidence region
+#' @param lwd.hatching A numeric indicating line width used in hatching
+#'   of the confidence region
 #' @param ellipse A logical indicating whether a confidence ellipse
 #'   should be drawn around the optimal cutoff
 #' @param xlim A character or numerical vector indicating the minimum
@@ -65,10 +77,10 @@
 #' "diagmeta".
 #' 
 #' The second argument \code{which} indicates which sort of plot(s)
-#' should be shown. For \code{which="reg"}, a scatter plot of the
-#' quantil-transformed proportions of negative test results with two
-#' regression lines is shown.  Points belonging to the same study are
-#' marked with the same colour. For \code{which="cdf"}, the two
+#' should be shown. For \code{which="regression"}, a scatter plot of
+#' the quantil-transformed proportions of negative test results with
+#' two regression lines is shown. Points belonging to the same study
+#' are marked with the same colour. For \code{which="cdf"}, the two
 #' cumulative distribution functions are shown, corresponding to the
 #' proportions of negative test results. For \code{which="survival"},
 #' the survival functions are shown, corresponding to the proportions
@@ -129,12 +141,12 @@
 #' diag1 <- diagmeta(tpos, fpos, tneg, fneg, cutpoint,
 #'                   studlab = paste(author, year, group),
 #'                   data = Schneider2017,
-#'                   model = "DIDS", log.cutoff = TRUE)
+#'                   log.cutoff = TRUE)
 #' 
 #' 
 #' # Regression plot with confidence intervals
 #' #
-#' plot(diag1, which = "reg", lines = FALSE, ci = TRUE)
+#' plot(diag1, which = "regr", lines = FALSE, ci = TRUE)
 #' 
 #' # Cumulative distribution plot with optimal cutoff line and
 #' # confidence intervals
@@ -178,7 +190,7 @@
 
 plot.diagmeta <- function(x,
                           which = c("survival", "youden", "roc", "sroc"),
-                          xlab = "threshold",
+                          xlab = "Threshold",
                           main,
                           ci = FALSE, ciSens = FALSE, ciSpec = FALSE,
                           mark.optcut = FALSE, mark.cutpoints = FALSE,
@@ -186,10 +198,14 @@ plot.diagmeta <- function(x,
                           rlines = TRUE, line.optcut = TRUE,
                           col.points = "rainbow",
                           cex = 1, pch.points = 16,
+                          col = "black",
                           col.ci = "gray",
+                          col.optcut = "black",
                           cex.marks = 0.7 * cex,
-                          lwd = 1, lwd.optcut = 2 * lwd,
+                          lwd = 1, lwd.ci = lwd, lwd.optcut = 2 * lwd,
+                          lwd.study = lwd,
                           shading = "none",
+                          col.hatching = col.ci, lwd.hatching = lwd.ci,
                           ellipse = FALSE,
                           xlim = NULL,
                           ...) {
@@ -218,7 +234,7 @@ plot.diagmeta <- function(x,
   ##
   which <- unique(which)
   ##
-  mains <- c("Regression lines", "Cumulative density functions",
+  mains <- c("Regression lines", "Cumulative distribution functions",
              "Survival curves", "Youden index", "ROC curves",
              "SROC curve", "Density functions",
              "Sensitivity and Specificity")[match(which, plot.types)]
@@ -253,8 +269,17 @@ plot.diagmeta <- function(x,
                                       "'terrain', 'cm', 'grayscale', ",
                                       "or any color defined in colours()"))
   ##
-  col.ci <- setchar(col.ci, colours(),
-                    text = "should be any color defined in colours()")
+  col <- setchar(col, c("transparent", colours()),
+                 text = paste0("should be 'transparent' or ",
+                               "any color defined in colours()"))
+  ##
+  col.ci <- setchar(col.ci, c("transparent", colours()),
+                    text = paste0("should be 'transparent' or ",
+                                  "any color defined in colours()"))
+  ##
+  col.optcut <- setchar(col.optcut, c("transparent", colours()),
+                        text = paste0("should be 'transparent' or ",
+                                      "any color defined in colours()"))
   ##
   shading <- setchar(shading,
                      c("none", "hatch", "shade"))
@@ -376,27 +401,29 @@ plot.diagmeta <- function(x,
       for (s in studlab) {
         lines(cutoff[studlab == s],
               qdiag(Spec[studlab == s], distr),
-              col = col.points[studlab == s], lwd = lwd, lty = 2)
+              col = col.points[studlab == s], lwd = lwd.study, lty = 2)
         ##
         lines(cutoff[studlab == s],
               qdiag(1 - Sens[studlab == s], distr),
-              col = col.points[studlab == s], lwd = lwd, lty = 1)
+              col = col.points[studlab == s], lwd = lwd.study, lty = 1)
       }
     ##
-    points(cutoff, qdiag(Spec, distr),
-           pch = 1, cex = cex, col = col.points)
-    ##
-    points(cutoff, qdiag(1 - Sens, distr),
-           pch = pch.points, cex = cex, col = col.points)      
+    if (points) {
+      points(cutoff, qdiag(Spec, distr),
+             pch = 1, cex = cex, col = col.points)
+      ##
+      points(cutoff, qdiag(1 - Sens, distr),
+             pch = pch.points, cex = cex, col = col.points)
+    }
     ##
     ## Add linear regression lines
     ##
     if (log.cutoff) {
       if (rlines) {
         curve(alpha0 + beta0 * log(x),
-              lty = 2, col = 1, lwd = lwd, add = TRUE)
+              lty = 2, col = col, lwd = lwd, add = TRUE)
         curve(alpha1 + beta1 * log(x),
-              lty = 1, col = 1, lwd = lwd, add = TRUE)
+              lty = 1, col = col, lwd = lwd, add = TRUE)
       }
       ##
       if (ci) {
@@ -405,33 +432,33 @@ plot.diagmeta <- function(x,
                      alpha0, var.alpha0, beta0, var.beta0, cov.alpha0.beta0,
                      var.nondiseased,
                      level)$lower,
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(ciRegr(log(x),
                      alpha0, var.alpha0, beta0, var.beta0, cov.alpha0.beta0,
                      var.nondiseased,
                      level)$upper,
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(ciRegr(log(x),
                      alpha1, var.alpha1, beta1, var.beta1, cov.alpha1.beta1,
                      var.diseased,
                      level)$lower,
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(ciRegr(log(x),
                      alpha1, var.alpha1, beta1, var.beta1, cov.alpha1.beta1,
                      var.diseased,
                      level)$upper,
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
     }
     else {
       if (rlines) {
         curve(alpha0 + beta0 * x,
-              lty = 2, col = 1, lwd = lwd, add = TRUE)
+              lty = 2, col = col, lwd = lwd, add = TRUE)
         curve(alpha1 + beta1 * x,
-              lty = 1, col = 1, lwd = lwd, add = TRUE)
+              lty = 1, col = col, lwd = lwd, add = TRUE)
       }
       ##
       if (ci) {
@@ -440,25 +467,25 @@ plot.diagmeta <- function(x,
                      alpha0, var.alpha0, beta0, var.beta0, cov.alpha0.beta0,
                      var.nondiseased,
                      level)$lower,
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(ciRegr(x,
                      alpha0, var.alpha0, beta0, var.beta0, cov.alpha0.beta0,
                      var.nondiseased,
                      level)$upper,
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(ciRegr(x,
                      alpha1, var.alpha1, beta1, var.beta1, cov.alpha1.beta1,
                      var.diseased,
                      level)$lower,
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(ciRegr(x,
                      alpha1, var.alpha1, beta1, var.beta1, cov.alpha1.beta1,
                      var.diseased,
                      level)$upper,
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
     }
   }
@@ -484,20 +511,22 @@ plot.diagmeta <- function(x,
       for (s in studlab) {
         lines(cutoff[studlab == s], 
               Spec[studlab == s],
-              col = col.points[studlab == s], lwd = lwd, lty = 2)
+              col = col.points[studlab == s], lwd = lwd.study, lty = 2)
         ##
         lines(cutoff[studlab == s], 
               1 - Sens[studlab == s],
-              col = col.points[studlab == s], lwd = lwd, lty = 1)
+              col = col.points[studlab == s], lwd = lwd.study, lty = 1)
       }
     ##
     ## Add data
     ##
-    points(cutoff, 1 - Sens,
-           pch = pch.points, cex = cex, col = col.points)
-    ##
-    points(cutoff, Spec,
-           pch = 1, cex = cex, col = col.points)
+    if (points) {
+      points(cutoff, 1 - Sens,
+             pch = pch.points, cex = cex, col = col.points)
+      ##
+      points(cutoff, Spec,
+             pch = 1, cex = cex, col = col.points)
+    }
     ##
     ## Add regression curves
     ##
@@ -511,7 +540,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$TE,
                        distr),
-              lty = 2, col = 1, lwd = lwd, add = TRUE)
+              lty = 2, col = col, lwd = lwd, add = TRUE)
         ##
         curve(calcSpec(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -520,7 +549,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$TE,
                        distr),
-              lty = 1, col = 1, lwd = lwd, add = TRUE)
+              lty = 1, col = col, lwd = lwd, add = TRUE)
       }
       ##
       if (ci) {
@@ -531,7 +560,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$lower,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSpec(ciRegr(log(x),
                               alpha0, var.alpha0,
@@ -540,7 +569,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$upper,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSpec(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -549,7 +578,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$lower,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSpec(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -558,7 +587,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$upper,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
     }
     else {
@@ -571,7 +600,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$TE,
                        distr),
-              lty = 2, col = 1, lwd = lwd, add = TRUE)
+              lty = 2, col = col, lwd = lwd, add = TRUE)
         ##
         curve(calcSpec(ciRegr(x,
                               alpha1, var.alpha1,
@@ -580,7 +609,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$TE,
                        distr),
-              lty = 1, col = 1, lwd = lwd, add = TRUE)
+              lty = 1, col = col, lwd = lwd, add = TRUE)
       }
       ##
       if (ci) {
@@ -591,7 +620,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$lower,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSpec(ciRegr(x,
                               alpha0, var.alpha0,
@@ -600,7 +629,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$upper,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSpec(ciRegr(x,
                               alpha1, var.alpha1,
@@ -609,7 +638,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$lower,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSpec(ciRegr(x,
                               alpha1, var.alpha1,
@@ -618,14 +647,14 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$upper,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
     }
     ##
     ## Draw line for optimal cutoff
     ##
     if (line.optcut)
-      abline(v = optcut)
+      abline(v = optcut, col = col.optcut, lwd = lwd.optcut)
   }
   
   
@@ -648,20 +677,23 @@ plot.diagmeta <- function(x,
       for (s in studlab)
         lines(cutoff[studlab == s], 
               Sens[studlab == s],
-              col = col.points[studlab == s], lwd = lwd, lty = 2)
+              col = col.points[studlab == s], lwd = lwd.study, lty = 1)
       ##
       for (s in studlab)
         lines(cutoff[studlab == s], 
               1 - Spec[studlab == s],
-              col = col.points[studlab == s], lwd = lwd, lty = 1)
+              col = col.points[studlab == s], lwd = lwd.study, lty = 2)
     }
     ##
     ## Add data
     ##
-    points(cutoff, Sens,
-           pch = pch.points, cex = cex, col = col.points)
-    ##
-    points(cutoff, 1 - Spec, pch = 1, cex = cex, col = col.points)
+    if (points) {
+      points(cutoff, Sens,
+             pch = pch.points, cex = cex, col = col.points)
+      ##
+      if (points)
+        points(cutoff, 1 - Spec, pch = 1, cex = cex, col = col.points)
+    }
     ##
     ## Add regression curves
     ##
@@ -675,7 +707,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$TE,
                        distr),
-              lty = 2, col = 1, lwd = lwd, add = TRUE)
+              lty = 2, col = col, lwd = lwd, add = TRUE)
         ##
         curve(calcSens(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -684,7 +716,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$TE,
                        distr),
-              lty = 1, col = 1, lwd = lwd, add = TRUE)
+              lty = 1, col = col, lwd = lwd, add = TRUE)
       }
       ##
       if (ci) {
@@ -695,7 +727,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$lower,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(log(x),
                               alpha0, var.alpha0,
@@ -704,7 +736,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$upper,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -713,7 +745,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$lower,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -722,7 +754,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$upper,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
     }
     else {
@@ -735,7 +767,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$TE,
                        distr),
-              lty = 2, col = 1, lwd = lwd, add = TRUE)
+              lty = 2, col = col, lwd = lwd, add = TRUE)
         ##
         curve(calcSens(ciRegr(x,
                               alpha1, var.alpha1,
@@ -744,7 +776,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$TE,
                        distr),
-              lty = 1, col = 1, lwd = lwd, add = TRUE)
+              lty = 1, col = col, lwd = lwd, add = TRUE)
       }
       ##
       if (ci) {
@@ -755,7 +787,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$lower,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(x,
                               alpha0, var.alpha0,
@@ -764,7 +796,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$upper,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(x,
                               alpha1, var.alpha1,
@@ -773,7 +805,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$lower,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(x,
                               alpha1, var.alpha1,
@@ -782,14 +814,14 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$upper,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
     }
     ##
     ## Draw line for optimal cutoff
     ##
     if (line.optcut)
-      abline(v = optcut)
+      abline(v = optcut, col = col.optcut, lwd = lwd.optcut)
   }
   
   
@@ -815,13 +847,14 @@ plot.diagmeta <- function(x,
       for (s in studlab)
         lines(cutoff[studlab == s],
               youden[studlab == s],
-              col = col.points[studlab == s], lwd = lwd)
+              col = col.points[studlab == s], lwd = lwd.study)
     }
     ##
     ## Add data
     ##
-    points(cutoff, youden,
-           pch = pch.points, col = col.points, cex = cex)
+    if (points)
+      points(cutoff, youden,
+             pch = pch.points, col = col.points, cex = cex)
     ##
     ## Plot Youden index
     ##
@@ -834,7 +867,7 @@ plot.diagmeta <- function(x,
                        cov.alpha1.beta0, cov.alpha1.beta1, cov.beta0.beta1,
                        var.nondiseased, var.diseased,
                        level)$lower,
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(ciYouden(log(x), distr, lambda,
                        alpha0, var.alpha0, beta0, var.beta0,
@@ -843,13 +876,13 @@ plot.diagmeta <- function(x,
                        cov.alpha1.beta0, cov.alpha1.beta1, cov.beta0.beta1,
                        var.nondiseased, var.diseased,
                        level)$upper,
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
       ##
       if (rlines)
         curve(calcYouden(log(x), distr, lambda,
                          alpha0, beta0, alpha1, beta1),
-              col = 1, add = TRUE)     
+              col = col, lwd = lwd, add = TRUE)     
     }
     else {
       if (ci) {
@@ -860,7 +893,7 @@ plot.diagmeta <- function(x,
                        cov.alpha1.beta0, cov.alpha1.beta1, cov.beta0.beta1,
                        var.nondiseased, var.diseased,
                        level)$lower,
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(ciYouden(x, distr, lambda,
                        alpha0, var.alpha0, beta0, var.beta0,
@@ -869,19 +902,19 @@ plot.diagmeta <- function(x,
                        cov.alpha1.beta0, cov.alpha1.beta1, cov.beta0.beta1,
                        var.nondiseased, var.diseased,
                        level)$upper,
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
       ##
       if (rlines)
         curve(calcYouden(x, distr, lambda,
                          alpha0, beta0, alpha1, beta1),
-              col = 1, add = TRUE)     
+              col = col, add = TRUE)     
     }
     ##
     ## Draw line for optimal cutoff
     ##
     if (line.optcut)
-      abline(v = optcut)
+      abline(v = optcut, col = col.optcut, lwd = lwd.optcut)
   }
   
   
@@ -903,7 +936,7 @@ plot.diagmeta <- function(x,
     for (s in studlab)
       lines(c(1, 1 - Spec[studlab == s], 0),
             c(1, Sens[studlab == s], 0),
-            col = col.points[studlab == s], lwd = lwd)
+            col = col.points[studlab == s], lwd = lwd.study)
     ##
     ## Add data
     ##
@@ -985,10 +1018,11 @@ plot.diagmeta <- function(x,
       else if (shading == "hatch")
         polygon(c(x.upper.Se, x.lower.Se[order(x.lower.Se)]),
                 c(y.upper.Se, y.lower.Se[order(x.lower.Se)]),
-                density = 20, angle = 90, col = "gray", border = "gray")
+                density = 20, angle = 90,
+                col = col.hatching, border = col.hatching, lwd = lwd.hatching)
       ##
-      lines(x.upper.Se, y.upper.Se, col = "darkgray")
-      lines(x.lower.Se, y.lower.Se, col = "darkgray")
+      lines(x.upper.Se, y.upper.Se, col = col.ci, lwd = lwd.ci)
+      lines(x.lower.Se, y.lower.Se, col = col.ci, lwd = lwd.ci)
     }
     ##
     if (ciSpec) {
@@ -999,10 +1033,11 @@ plot.diagmeta <- function(x,
       else if (shading == "hatch")
         polygon(c(x.upper.Sp, x.lower.Sp[order(x.lower.Sp)]),
                 c(y.upper.Sp, y.lower.Sp[order(x.lower.Sp)]),
-                density = 20, angle = 0, col = "gray", border = "gray")
+                density = 20, angle = 0,
+                col = col.hatching, border = col.hatching, lwd = lwd.hatching)
       ##
-      lines(x.upper.Sp, y.upper.Sp, col = "darkgray", lty = 2)
-      lines(x.lower.Sp, y.lower.Sp, col = "darkgray", lty = 2)
+      lines(x.upper.Sp, y.upper.Sp, col = col.ci, lwd = lwd.ci, lty = 2)
+      lines(x.lower.Sp, y.lower.Sp, col = col.ci, lwd = lwd.ci, lty = 2)
     }
     ##
     ## Add ROC curve
@@ -1010,7 +1045,7 @@ plot.diagmeta <- function(x,
     curve(pdiag(alpha1 + beta1 *
                 (qdiag(1 - x, distr) - alpha0) / beta0,
                 distr, FALSE),
-          lwd = lwd, col = 1, add = TRUE)
+          lwd = lwd, col = col, add = TRUE)
     ##
     if (mark.optcut) {
       if (log.cutoff)
@@ -1020,7 +1055,7 @@ plot.diagmeta <- function(x,
       ##
       points(pdiag(alpha0 + beta0 * ocut, distr, FALSE),
              pdiag(alpha1 + beta1 * ocut, distr, FALSE),
-             lwd = lwd.optcut, cex = 2, pch = 3, col = 1)
+             lwd = lwd.optcut, cex = 2, pch = 3, col = col.optcut)
     }
     ##
     ## Add data
@@ -1074,29 +1109,31 @@ plot.diagmeta <- function(x,
     ##
     if (log.cutoff) {
       curve(beta0 * ddiag(beta0 * log(x) + alpha0, distr),
-            lty = 2, log = "x", las = 1,
+            log = "x", las = 1,
             from = min(exp(Cutoff)), to = max(exp(Cutoff)),
             xlab = xlab, ylab = "",
-            main = mains[match("density", which)])
+            main = mains[match("density", which)],
+            lty = 2, col = col, lwd = lwd)
       ##
       curve(beta1 * ddiag(beta1 * log(x) + alpha1, distr),
-            lty = 1, add = TRUE)
+            lty = 1, col = col, lwd = lwd, add = TRUE)
     }
     else {
       curve(beta0 * ddiag(beta0 * x + alpha0, distr),
-            lty = 2, las = 1,
+            las = 1,
             from = min(Cutoff), to = max(Cutoff),
             xlab = xlab, ylab = "",
-            main = mains[match("density", which)])
+            main = mains[match("density", which)],
+            lty = 2, col = col, lwd = lwd)
       ##
       curve(beta1 * ddiag(beta1 * x + alpha1, distr),
-            lty = 1, add = TRUE)
+            lty = 1, col = col, lwd = lwd, add = TRUE)
     }
     ##
     ## draw optimal cut-off
     ##
     if (line.optcut)
-      abline(v = optcut)
+      abline(v = optcut, col = col.optcut, lwd = lwd.optcut)
   }
   
   
@@ -1119,19 +1156,21 @@ plot.diagmeta <- function(x,
     if (lines) {
       for (s in studlab) {
         lines(cutoff[studlab == s], Spec[studlab == s],
-              col = col.points[studlab == s], lwd = lwd,
+              col = col.points[studlab == s], lwd = lwd.study,
               lty = 2)
         lines(cutoff[studlab == s], Sens[studlab == s],
-              col = col.points[studlab == s], lwd = lwd,
+              col = col.points[studlab == s], lwd = lwd.study,
               lty = 1)
       }
     }
     ##
     ## Add data
     ##
-    points(cutoff, Sens, pch = pch.points, cex = cex,
-           col = col.points)
-    points(cutoff, Spec, pch = 1, cex = cex, col = col.points)
+    if (points) {
+      points(cutoff, Sens, pch = pch.points, cex = cex,
+             col = col.points)
+      points(cutoff, Spec, pch = 1, cex = cex, col = col.points)
+    }
     ##
     ## Add curves
     ##
@@ -1145,7 +1184,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$TE,
                        distr),
-              lty = 2, col = 1, lwd = lwd, add = TRUE)
+              lty = 2, col = col, lwd = lwd, add = TRUE)
         ##
         curve(calcSens(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -1154,7 +1193,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$TE,
                        distr),
-              lty = 1, col = 1, lwd = lwd, add = TRUE)
+              lty = 1, col = col, lwd = lwd, add = TRUE)
       }
       ##
       if (ci) {
@@ -1165,7 +1204,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$lower,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSpec(ciRegr(log(x),
                               alpha0, var.alpha0,
@@ -1174,7 +1213,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$upper,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -1183,7 +1222,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$lower,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(log(x),
                               alpha1, var.alpha1,
@@ -1192,7 +1231,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$upper,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
     }
     else {
@@ -1205,7 +1244,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$TE,
                        distr),
-              lty = 2, col = 1, lwd = lwd, add = TRUE)
+              lty = 2, col = col, lwd = lwd, add = TRUE)
         ##
         curve(calcSens(ciRegr(x,
                               alpha1, var.alpha1,
@@ -1214,7 +1253,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$TE,
                        distr),
-              lty = 1, col = 1, lwd = lwd, add = TRUE)
+              lty = 1, col = col, lwd = lwd, add = TRUE)
       }
       ##
       if (ci) {
@@ -1225,7 +1264,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$lower,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSpec(ciRegr(x,
                               alpha0, var.alpha0,
@@ -1234,7 +1273,7 @@ plot.diagmeta <- function(x,
                               var.nondiseased,
                               level)$upper,
                        distr),
-              lty = 2, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 2, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(x,
                               alpha1, var.alpha1,
@@ -1243,7 +1282,7 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$lower,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
         ##
         curve(calcSens(ciRegr(x,
                               alpha1, var.alpha1,
@@ -1252,14 +1291,14 @@ plot.diagmeta <- function(x,
                               var.diseased,
                               level)$upper,
                        distr),
-              lty = 1, col = col.ci, lwd = lwd, add = TRUE)
+              lty = 1, col = col.ci, lwd = lwd.ci, add = TRUE)
       }
     }
     ##
     ## Draw line for optimal cutoff
     ##
     if (line.optcut) 
-      abline(v = optcut)
+      abline(v = optcut, col = col.optcut, lwd = lwd.optcut)
   }  
   
   invisible(NULL)

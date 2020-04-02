@@ -9,10 +9,10 @@
 #' al. (2017) and are published as a supplement (Appendix 1) to
 #' Schneider et al. (2017). They have been preprocessed for use in R
 #' package \bold{diagmeta}.
+#' 
+#' @name Schneider2017
 #'
 #' @docType data
-#' 
-#' @usage Schneider2017
 #'
 #' @format
 #' A data frame with the following columns:
@@ -51,9 +51,9 @@
 #' diag1 <- diagmeta(tpos, fpos, tneg, fneg, cutpoint,
 #'                   studlab = paste(author, year, group),
 #'                   data = Schneider2017,
-#'                   model = "DIDS", log.cutoff = TRUE)
+#'                   log.cutoff = TRUE)
 #' 
 #' plot(diag1)
 
 
-"Schneider2017"
+NULL
