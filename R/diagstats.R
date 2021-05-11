@@ -92,15 +92,15 @@ diagstats <- function(x,
   meta:::chknumeric(cutoff)
   ##
   if (!missing(prevalence))
-    meta:::chklevel(prevalence, single = FALSE)
+    meta:::chklevel(prevalence, length = 0)
   else
     prevalence <- NA
   ##
   if (sens.given)
-    meta:::chklevel(sens, single = FALSE)
+    meta:::chklevel(sens, length = 0)
   ##
   if (spec.given)
-    meta:::chklevel(spec, single = FALSE)
+    meta:::chklevel(spec, length = 0)
   ##
   meta:::chklevel(level)
 
@@ -115,26 +115,41 @@ diagstats <- function(x,
   distr <- x$distr
   
   
-  if (sens.given) {
-    if (x$log.cutoff)
-      cutoff1 <- exp((qdiag(1 - sens, distr) - alpha1) / beta1)
+  if (sens.given & spec.given) {
+    cutoff1 <- (qdiag(1 - sens, distr) - alpha1) / beta1
+    cutoff2 <- (qdiag(spec, distr) - alpha0) / beta0
+    ##
+    if (x$log.cutoff) {
+      cutoff1 <- exp(cutoff1)
+      cutoff2 <- exp(cutoff2)
+    }
+    ##
+    if (cutoff.given)
+      cutoff <- c(cutoff, cutoff1, cutoff2)
     else
-      cutoff1 <- (qdiag(1 - sens, distr) - alpha1) / beta1
+      cutoff <- c(cutoff1, cutoff2)
+  }
+  else if (sens.given) {
+    cutoff1 <- (qdiag(1 - sens, distr) - alpha1) / beta1
+    ##
+    if (x$log.cutoff)
+      cutoff1 <- exp(cutoff1)
     ##
     if (cutoff.given)
       cutoff <- c(cutoff, cutoff1)
     else
       cutoff <- cutoff1
   }
-  ##
-  if (spec.given) {
-    if (x$log.cutoff)
-      cutoff2 <- exp((qdiag(spec, distr) - alpha0) / beta0)
-    else
-      cutoff2 <- (qdiag(spec, distr) - alpha0) / beta0
+  else if (spec.given) {
+    cutoff2 <- (qdiag(spec, distr) - alpha0) / beta0
     ##
-    if (cutoff.given | sens.given)
+    if (x$log.cutoff)
+      cutoff2 <- exp(cutoff2)
+    ##
+    if (cutoff.given)
       cutoff <- c(cutoff, cutoff2)
+    else
+      cutoff <- cutoff2
   }
   
   
@@ -153,7 +168,8 @@ diagstats <- function(x,
         stop("Lengths of arguments 'cutoff' and 'prevalence' do not match.",
              call. = FALSE)
       else
-        stop("Number of cutoffs and prevalences (argument 'prevalence') do not match.")
+        stop("Number of cutoffs and prevalences (argument 'prevalence') ",
+             "do not match.")
     }
   }
   
